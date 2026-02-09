@@ -56,6 +56,25 @@ PRESETS = {
         "coins": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "BNBUSDT"],
         "timeframes": ["5", "15", "60"],
     },
+    "bankroll_boost": {
+        "name": "Bankroll Boost",
+        "emoji": "\U0001f680",
+        "description": "Aggressive bankroll boost: $10 -> $50 slots",
+        "leverage_min": 15.0,
+        "leverage_max": 20.0,
+        "position_size_min": 80.0,
+        "position_size_max": 95.0,
+        "sl_min": 2.0,
+        "sl_max": 3.5,
+        "tp_min": 2.0,
+        "tp_max": 4.0,
+        "max_daily_loss": 80.0,
+        "max_drawdown": 90.0,
+        "max_positions": 1,
+        "min_confidence": 62.0,
+        "coins": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "BNBUSDT"],
+        "timeframes": ["5", "15"],
+    },
 }
 
 
