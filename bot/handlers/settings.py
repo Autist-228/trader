@@ -7,6 +7,13 @@ from bot.keyboards import settings_kb, trader_preset_kb, mode_kb, confirm_live_k
 
 router = Router()
 
+RU_LABELS = {
+    'conservative': 'Консервативный',
+    'balanced': 'Сбалансированный',
+    'aggressive': 'Агрессивный',
+}
+
+
 
 @router.callback_query(F.data == "settings")
 async def show_settings(callback: CallbackQuery):
@@ -18,18 +25,21 @@ async def show_settings(callback: CallbackQuery):
     settings = await get_user_settings(user["id"])
     preset = get_preset(user["trader_preset"])
 
+    ru_name = RU_LABELS.get(user['trader_preset'], user['trader_preset'])
     text = (
-        f"Настройки\n\n"
-        f"AI Трейдер: {preset['name']}\n"
-        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
-        f"Плечо: {settings['leverage_min']}-{settings['leverage_max']}x\n"
-        f"Размер позиции: {settings['position_size_min']}-{settings['position_size_max']}%\n"
-        f"SL: {settings['sl_min']}-{settings['sl_max']}%\n"
-        f"TP: {settings['tp_min']}-{settings['tp_max']}%\n"
-        f"Макс. дневная просадка: {settings['max_daily_loss']}%\n"
-        f"Макс. позиций: {settings['max_positions']}\n"
-        f"Мин. уверенность: {settings['min_confidence']}%\n"
-        f"Монеты: {', '.join(settings['coins'])}\n"
+        f"⚙️ Настройки\n\n"
+        f"🤖 Трейдер: {ru_name}\n"
+        f"📈 Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n\n"
+        f"⚖️ Риск: {preset['risk']}\n"
+        f"⚙️ Плечо: {settings['leverage_min']}-{settings['leverage_max']}x\n"
+        f"📦 Размер позиции: {settings['position_size_min']}-{settings['position_size_max']}%\n"
+        f"🛡 SL: {settings['sl_min']}-{settings['sl_max']}%\n"
+        f"🎯 TP: {settings['tp_min']}-{settings['tp_max']}%\n"
+        f"🚫 Макс. дневная просадка: {settings['max_daily_loss']}%\n"
+        f"📊 Макс. позиций: {settings['max_positions']}\n"
+        f"🤖 Мин. уверенность AI: {settings['min_confidence']}%\n"
+        f"🪙 Монеты: {', '.join(settings['coins'])}\n"
+        f"⏱ Таймфреймы: {', '.join(preset['timeframes'])}\n"
     )
 
     await callback.message.edit_text(text, reply_markup=settings_kb())
@@ -43,13 +53,18 @@ async def set_trader(callback: CallbackQuery):
 
     text = "Выберите AI трейдера:\n\n"
     for key, p in PRESETS.items():
-        marker = " <- текущая" if key == current else ""
+        marker = " ← текущая" if key == current else ""
+        dot = "🟢" if key == "conservative" else ("🟡" if key == "balanced" else "🔴")
+        ru = RU_LABELS.get(key, p['name'])
         text += (
-            f"{p['name']}{marker}\n"
-            f"  Плечо: {p['leverage_min']}-{p['leverage_max']}x\n"
-            f"  Размер позиции: {p['position_size_min']}-{p['position_size_max']}%\n"
-            f"  Уверенность: {p['min_confidence']}%+\n"
-            f"  Монеты: {len(p['coins'])}\n\n"
+            f"{dot} {ru}{marker}\n"
+            f"• Риск: {p['risk']}\n"
+            f"• Плечо: {p['leverage_min']}-{p['leverage_max']}x\n"
+            f"• Размер позиции: {p['position_size_min']}-{p['position_size_max']}%\n"
+            f"• SL/TP: {p['sl_min']}-{p['sl_max']}% / {p['tp_min']}-{p['tp_max']}%\n"
+            f"• Мин. уверенность: {p['min_confidence']}%+\n"
+            f"• Монеты: {', '.join(p['coins'])}\n"
+            f"• Таймфреймы: {', '.join(p['timeframes'])}\n\n"
         )
 
     await callback.message.edit_text(text, reply_markup=trader_preset_kb())
