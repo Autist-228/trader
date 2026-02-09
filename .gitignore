@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.pkl
+*.joblib
+models/
+data/*.csv
+data/*.json
+.vscode/
+.idea/
+*.log
+venv/
+.venv/
