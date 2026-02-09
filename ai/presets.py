@@ -1,8 +1,7 @@
 PRESETS = {
     "conservative": {
-        "name": "Conservative",
-        "emoji": "\ud83d\udfe2",
-        "description": "Low risk, high confidence trades only",
+        "name": "Konservativnyj",
+        "risk": "Nizkij",
         "leverage_min": 1.0,
         "leverage_max": 3.0,
         "position_size_min": 1.0,
@@ -19,9 +18,8 @@ PRESETS = {
         "timeframes": ["60", "240"],
     },
     "balanced": {
-        "name": "Balanced",
-        "emoji": "\ud83d\udfe1",
-        "description": "Medium risk, balanced approach",
+        "name": "Sbalansirovannyj",
+        "risk": "Srednij",
         "leverage_min": 2.0,
         "leverage_max": 5.0,
         "position_size_min": 2.0,
@@ -38,9 +36,8 @@ PRESETS = {
         "timeframes": ["15", "60", "240"],
     },
     "aggressive": {
-        "name": "Aggressive",
-        "emoji": "\ud83d\udd34",
-        "description": "High risk, high reward",
+        "name": "Agressivnyj",
+        "risk": "Vysokij",
         "leverage_min": 3.0,
         "leverage_max": 10.0,
         "position_size_min": 3.0,
@@ -56,25 +53,12 @@ PRESETS = {
         "coins": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "BNBUSDT"],
         "timeframes": ["5", "15", "60"],
     },
-    "bankroll_boost": {
-        "name": "Bankroll Boost",
-        "emoji": "\U0001f680",
-        "description": "Aggressive bankroll boost: $10 -> $50 slots",
-        "leverage_min": 15.0,
-        "leverage_max": 20.0,
-        "position_size_min": 80.0,
-        "position_size_max": 95.0,
-        "sl_min": 2.0,
-        "sl_max": 3.5,
-        "tp_min": 2.0,
-        "tp_max": 4.0,
-        "max_daily_loss": 80.0,
-        "max_drawdown": 90.0,
-        "max_positions": 1,
-        "min_confidence": 62.0,
-        "coins": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "BNBUSDT"],
-        "timeframes": ["5", "15"],
-    },
+}
+
+PRESET_LABELS = {
+    "conservative": "Konservativnyj",
+    "balanced": "Sbalansirovannyj",
+    "aggressive": "Agressivnyj",
 }
 
 

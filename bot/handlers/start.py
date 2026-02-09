@@ -180,7 +180,7 @@ async def main_menu(callback: CallbackQuery):
             pass
 
     if user["trading_mode"] == "paper":
-        text += f"\nPaper Balance: {user['paper_balance']:.2f} USDT"
+        text += f"\nДемо-баланс: {user['paper_balance']:.2f} USDT"
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
     await callback.answer()

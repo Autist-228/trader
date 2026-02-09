@@ -60,7 +60,7 @@ async def set_trader(callback: CallbackQuery):
 async def select_preset(callback: CallbackQuery):
     preset_name = callback.data.replace("preset_", "")
     if preset_name not in PRESETS:
-        await callback.answer("Invalid preset")
+        await callback.answer("Неверный пресет")
         return
 
     user = await get_user(callback.from_user.id)

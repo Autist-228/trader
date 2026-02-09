@@ -145,16 +145,16 @@ async def cmd_balance(message: Message):
             client = BybitClient(keys[0], keys[1])
             bal = client.get_balance()
             if bal:
-                text = f"Balance: {bal['total']:.2f} USDT (available: {bal['available']:.2f})"
+                text = f"Баланс: {bal['total']:.2f} USDT (доступно: {bal['available']:.2f})"
             else:
-                text = "Could not fetch balance"
+                text = "Не удалось получить баланс"
         except Exception:
-            text = "Error connecting to Bybit"
+            text = "Ошибка подключения к Bybit"
     else:
-        text = "No API keys set"
+        text = "API ключи не указаны"
 
     if user["trading_mode"] == "paper":
-        text += f"\nPaper: {user['paper_balance']:.2f} USDT"
+        text += f"\nДемо: {user['paper_balance']:.2f} USDT"
 
     await message.answer(text)
 
@@ -219,7 +219,7 @@ async def show_positions(callback: CallbackQuery):
         await callback.answer()
         return
 
-    text = f"Open Positions ({len(trades)}):\n\n"
+    text = f"Открытые позиции ({len(trades)}):\n\n"
     for t in trades:
         display = COIN_DISPLAY.get(t["symbol"], t["symbol"])
         paper_tag = "[P] " if t["is_paper"] else ""
@@ -247,7 +247,7 @@ async def cmd_positions(message: Message):
         await message.answer("Нет открытых позиций.")
         return
 
-    text = f"Open Positions ({len(trades)}):\n\n"
+    text = f"Открытые позиции ({len(trades)}):\n\n"
     for t in trades:
         display = COIN_DISPLAY.get(t["symbol"], t["symbol"])
         paper_tag = "[P] " if t["is_paper"] else ""
@@ -273,7 +273,7 @@ async def show_history(callback: CallbackQuery):
         await callback.answer()
         return
 
-    text = "Recent Trades:\n\n"
+    text = "Последние сделки:\n\n"
     for t in trades:
         display = COIN_DISPLAY.get(t["symbol"], t["symbol"])
         pnl_sign = "+" if t["pnl"] > 0 else ""
@@ -300,10 +300,10 @@ async def cmd_history(message: Message):
 
     trades = await get_trade_history(user["id"], limit=10)
     if not trades:
-        await message.answer("No trade history.")
+        await message.answer("Нет истории сделок.")
         return
 
-    text = "Recent Trades:\n\n"
+    text = "Последние сделки:\n\n"
     for t in trades:
         display = COIN_DISPLAY.get(t["symbol"], t["symbol"])
         pnl_sign = "+" if t["pnl"] > 0 else ""
