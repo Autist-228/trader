@@ -20,7 +20,7 @@ async def show_settings(callback: CallbackQuery):
 
     text = (
         f"Настройки\n\n"
-        f"AI Трейдер: {preset['emoji']} {preset['name']}\n"
+        f"AI Трейдер: {preset['name']}\n"
         f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
         f"Плечо: {settings['leverage_min']}-{settings['leverage_max']}x\n"
         f"Размер позиции: {settings['position_size_min']}-{settings['position_size_max']}%\n"
@@ -45,7 +45,7 @@ async def set_trader(callback: CallbackQuery):
     for key, p in PRESETS.items():
         marker = " <- текущая" if key == current else ""
         text += (
-            f"{p['emoji']} {p['name']}{marker}\n"
+            f"{p['name']}{marker}\n"
             f"  Плечо: {p['leverage_min']}-{p['leverage_max']}x\n"
             f"  Размер позиции: {p['position_size_min']}-{p['position_size_max']}%\n"
             f"  Уверенность: {p['min_confidence']}%+\n"
@@ -71,7 +71,7 @@ async def select_preset(callback: CallbackQuery):
 
     preset = get_preset(preset_name)
     await callback.message.edit_text(
-        f"AI трейдер установлен: {preset['emoji']} {preset['name']}!\n\n"
+        f"AI трейдер установлен: {preset['name']}!\n\n"
         f"Плечо: {preset['leverage_min']}-{preset['leverage_max']}x\n"
         f"Размер позиции: {preset['position_size_min']}-{preset['position_size_max']}%\n"
         f"SL: {preset['sl_min']}-{preset['sl_max']}%\n"
@@ -145,7 +145,7 @@ async def confirm_live(callback: CallbackQuery):
         "Будьте осторожны и контролируйте позиции.",
         reply_markup=settings_kb(),
     )
-    await callback.answer("Live mode activated!")
+    await callback.answer("Реальный режим активирован")
 
 
 @router.callback_query(F.data == "set_notifications")
@@ -154,7 +154,7 @@ async def set_notifications(callback: CallbackQuery):
     settings = await get_user_settings(user["id"])
 
     await callback.message.edit_text(
-        "Notification Settings:\n\nToggle notifications on/off:",
+        "Уведомления:\n\nПереключайте нужные уведомления:",
         reply_markup=notifications_kb(settings),
     )
     await callback.answer()
@@ -172,7 +172,7 @@ async def toggle_notification(callback: CallbackQuery):
 
     settings[field] = new_val
     await callback.message.edit_text(
-        "Notification Settings:\n\nToggle notifications on/off:",
+        "Уведомления:\n\nПереключайте нужные уведомления:",
         reply_markup=notifications_kb(settings),
     )
     await callback.answer(f"{'Включено' if new_val else 'Выключено'}")
