@@ -105,7 +105,7 @@ def build_features(candles: list[dict], ticker: dict = None, oi_data: list[dict]
         df["oi_change"] = 0
 
     df = df.replace([np.inf, -np.inf], np.nan)
-    df = df.fillna(method="ffill").fillna(0)
+    df = df.ffill().fillna(0)
 
     return df
 

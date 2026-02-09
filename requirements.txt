@@ -8,4 +8,3 @@ scikit-learn==1.6.1
 aiosqlite==0.20.0
 cryptography==44.0.0
 python-dotenv==1.0.1
-aiohttp==3.11.11
