@@ -37,8 +37,8 @@ async def cmd_admin(message: Message):
     text = (
         f"Админ-панель\n\n"
         f"Пользователи: {stats['total_users']}\n"
-        f"Active Bots: {stats['active_bots']}\n"
-        f"Total Trades: {stats['total_trades']}\n"
+        f"Активные боты: {stats['active_bots']}\n"
+        f"Всего сделок: {stats['total_trades']}\n"
         f"Platform PnL: {stats['total_pnl']:.4f} USDT\n"
         f"Win Rate: {stats['win_rate']:.1f}%\n"
         f"Today Trades: {stats['today_trades']}\n"
@@ -50,7 +50,7 @@ async def cmd_admin(message: Message):
 @router.callback_query(F.data == "admin_users")
 async def admin_users(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     users = await get_all_users()
@@ -84,7 +84,7 @@ async def admin_users(callback: CallbackQuery):
 @router.callback_query(F.data == "admin_stats")
 async def admin_stats(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     stats = await get_platform_stats()
@@ -126,7 +126,7 @@ async def admin_stats(callback: CallbackQuery):
 @router.callback_query(F.data == "admin_model")
 async def admin_model(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     from ai.model import AIModel
@@ -147,7 +147,7 @@ async def admin_model(callback: CallbackQuery):
 @router.callback_query(F.data == "admin_retrain")
 async def admin_retrain(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     await callback.message.edit_text("Переобучаю модель... Это может занять минуту.")
@@ -181,7 +181,7 @@ async def admin_retrain(callback: CallbackQuery):
 @router.callback_query(F.data == "admin_broadcast")
 async def admin_broadcast_start(callback: CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     await callback.message.edit_text("Отправьте сообщение для рассылки всем пользователям:")
@@ -220,7 +220,7 @@ async def admin_broadcast_send(message: Message, state: FSMContext):
 @router.callback_query(F.data == "admin_logs")
 async def admin_logs(callback: CallbackQuery):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     from database.models import get_db
@@ -253,7 +253,7 @@ async def admin_logs(callback: CallbackQuery):
 @router.callback_query(F.data == "admin_set_api")
 async def admin_set_api(callback: CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
-        await callback.answer("Access denied")
+        await callback.answer("Доступ запрещён")
         return
 
     await callback.message.edit_text("Отправьте ваш Bybit API Key:")
