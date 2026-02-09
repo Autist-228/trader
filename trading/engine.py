@@ -157,12 +157,12 @@ class TradingEngine:
                 )
 
                 msg = (
-                    f"{'[PAPER] ' if is_paper else ''}{side} {symbol}\n"
-                    f"Price: {price}\n"
-                    f"Leverage: {params['leverage']}x\n"
-                    f"Size: {position_usdt:.2f} USDT\n"
-                    f"SL: {levels['sl']} | TP: {levels['tp1']}/{levels['tp2']}/{levels['tp3']}\n"
-                    f"AI Confidence: {confidence:.1f}%"
+                    f"{'[ДЕМО] ' if is_paper else ''}{'ПОКУПКА' if side == 'Buy' else 'ПРОДАЖА'} {symbol}\n"
+                    f"💵 Цена: {price}\n"
+                    f"⚙️ Плечо: {params['leverage']}x\n"
+                    f"📦 Размер: {position_usdt:.2f} USDT\n"
+                    f"🛡 SL: {levels['sl']} | 🎯 TP: {levels['tp1']}/{levels['tp2']}/{levels['tp3']}\n"
+                    f"🤖 Уверенность AI: {confidence:.1f}%"
                 )
                 await self.notify(telegram_id, msg)
                 await log_event("INFO", "engine", f"Trade opened: {side} {symbol} for user {user_id}")
