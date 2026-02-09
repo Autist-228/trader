@@ -100,6 +100,37 @@ async def select_preset(callback: CallbackQuery):
     await callback.answer("Пресет применён!")
 
 
+@router.callback_query(F.data == "about_strategies")
+async def about_strategies(callback: CallbackQuery):
+    lines = []
+    def card(key: str, p: dict) -> str:
+        dot = "🟢" if key == "conservative" else ("🟡" if key == "balanced" else "🔴")
+        ru = RU_LABELS.get(key, p['name'])
+        tips = {
+            'conservative': "• Минимальные просадки, ночной/фоновый режим, тест рынка",
+            'balanced': "• Ежедневная торговля, средний риск/доходность",
+            'aggressive': "• Быстрые движения/волатильность, раскрутка депозита (высокий риск)",
+        }
+        return (
+            f"{dot} {ru}\n"
+            f"• Риск: {p['risk']}\n"
+            f"• Плечо: {p['leverage_min']}-{p['leverage_max']}x\n"
+            f"• Размер позиции: {p['position_size_min']}-{p['position_size_max']}%\n"
+            f"• SL/TP: {p['sl_min']}-{p['sl_max']}% / {p['tp_min']}-{p['tp_max']}%\n"
+            f"• Мин. уверенность: {p['min_confidence']}%+\n"
+            f"• Монеты: {', '.join(p['coins'])}\n"
+            f"• Таймфреймы: {', '.join(p['timeframes'])}\n"
+            f"• Когда включать: {tips.get(key, '')}\n"
+        )
+
+    lines.append("ℹ️ О стратегиях\n")
+    for k, p in PRESETS.items():
+        lines.append(card(k, p) + "\n")
+
+    await callback.message.edit_text("\n".join(lines), reply_markup=settings_kb())
+    await callback.answer()
+
+
 @router.callback_query(F.data == "set_mode")
 async def set_mode(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)

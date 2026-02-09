@@ -26,6 +26,7 @@ def main_menu_kb() -> InlineKeyboardMarkup:
 def settings_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🤖 AI Стратегия", callback_data="set_trader")],
+        [InlineKeyboardButton(text="ℹ️ О стратегиях", callback_data="about_strategies")],
         [InlineKeyboardButton(text="💱 Режим торговли", callback_data="set_mode")],
         [InlineKeyboardButton(text="🔑 API ключи Bybit", callback_data="set_api_keys")],
         [InlineKeyboardButton(text="🔔 Уведомления", callback_data="set_notifications")],
