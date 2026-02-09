@@ -23,21 +23,21 @@ class ApiKeyInput(StatesGroup):
 async def show_status(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     open_trades = await get_open_trades(user["id"])
     pnl_data = await get_user_total_pnl(user["id"])
 
     text = (
-        f"Status\n\n"
-        f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-        f"Preset: {user['trader_preset'].capitalize()}\n"
-        f"Bot: {'Active' if user['is_bot_active'] else 'Stopped'}\n\n"
-        f"Open Positions: {len(open_trades)}\n"
-        f"Total Trades: {pnl_data['total_trades']}\n"
-        f"Total PnL: {pnl_data['total_pnl']:.4f} USDT\n"
-        f"Win Rate: {(pnl_data['wins'] / pnl_data['total_trades'] * 100) if pnl_data['total_trades'] > 0 else 0:.1f}%\n"
+        f"Статус\n\n"
+        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+        f"Пресет: {user['trader_preset'].capitalize()}\n"
+        f"Бот: {'Работает' if user['is_bot_active'] else 'Остановлен'}\n\n"
+        f"Открытых позиций: {len(open_trades)}\n"
+        f"Всего сделок: {pnl_data['total_trades']}\n"
+        f"Суммарный PnL: {pnl_data['total_pnl']:.4f} USDT\n"
+        f"Винрейт: {(pnl_data['wins'] / pnl_data['total_trades'] * 100) if pnl_data['total_trades'] > 0 else 0:.1f}%\n"
     )
 
     keys = await get_api_keys(user["id"])
@@ -47,16 +47,16 @@ async def show_status(callback: CallbackQuery):
             bal = client.get_balance()
             if bal:
                 text += (
-                    f"\nBybit Balance:\n"
-                    f"  Total: {bal['total']:.2f} USDT\n"
-                    f"  Available: {bal['available']:.2f} USDT\n"
-                    f"  Unrealized PnL: {bal['unrealized_pnl']:.4f} USDT\n"
+                    f"\nБаланс Bybit:\n"
+                    f"  Всего: {bal['total']:.2f} USDT\n"
+                    f"  Доступно: {bal['available']:.2f} USDT\n"
+                    f"  Нереализ. PnL: {bal['unrealized_pnl']:.4f} USDT\n"
                 )
         except Exception:
             pass
 
     if user["trading_mode"] == "paper":
-        text += f"\nPaper Balance: {user['paper_balance']:.2f} USDT"
+        text += f"\nДемо-баланс: {user['paper_balance']:.2f} USDT"
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
     await callback.answer()
@@ -66,17 +66,17 @@ async def show_status(callback: CallbackQuery):
 async def cmd_status(message: Message):
     user = await get_user(message.from_user.id)
     if not user:
-        await message.answer("Please /start first")
+        await message.answer("Сначала нажмите /start")
         return
 
     open_trades = await get_open_trades(user["id"])
     pnl_data = await get_user_total_pnl(user["id"])
 
     text = (
-        f"Status\n\n"
-        f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-        f"Bot: {'Active' if user['is_bot_active'] else 'Stopped'}\n"
-        f"Open: {len(open_trades)} | Total: {pnl_data['total_trades']}\n"
+        f"Статус\n\n"
+        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+        f"Бот: {'Работает' if user['is_bot_active'] else 'Остановлен'}\n"
+        f"Открыто: {len(open_trades)} | Всего: {pnl_data['total_trades']}\n"
         f"PnL: {pnl_data['total_pnl']:.4f} USDT\n"
     )
 
@@ -86,12 +86,12 @@ async def cmd_status(message: Message):
             client = BybitClient(keys[0], keys[1])
             bal = client.get_balance()
             if bal:
-                text += f"Balance: {bal['total']:.2f} USDT\n"
+                text += f"Баланс: {bal['total']:.2f} USDT\n"
         except Exception:
             pass
 
     if user["trading_mode"] == "paper":
-        text += f"Paper: {user['paper_balance']:.2f} USDT"
+        text += f"Демо: {user['paper_balance']:.2f} USDT"
 
     await message.answer(text)
 
@@ -100,10 +100,10 @@ async def cmd_status(message: Message):
 async def show_balance(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
-    text = "Balance\n\n"
+    text = "Баланс\n\n"
 
     keys = await get_api_keys(user["id"])
     if keys:
@@ -112,20 +112,20 @@ async def show_balance(callback: CallbackQuery):
             bal = client.get_balance()
             if bal:
                 text += (
-                    f"Bybit Account:\n"
-                    f"  Total: {bal['total']:.2f} USDT\n"
-                    f"  Available: {bal['available']:.2f} USDT\n"
-                    f"  Unrealized PnL: {bal['unrealized_pnl']:.4f} USDT\n"
+                    f"Аккаунт Bybit:\n"
+                    f"  Всего: {bal['total']:.2f} USDT\n"
+                    f"  Доступно: {bal['available']:.2f} USDT\n"
+                    f"  Нереализ. PnL: {bal['unrealized_pnl']:.4f} USDT\n"
                 )
             else:
-                text += "Could not fetch Bybit balance\n"
+                text += "Не удалось получить баланс Bybit\n"
         except Exception:
-            text += "Error connecting to Bybit\n"
+            text += "Ошибка подключения к Bybit\n"
     else:
-        text += "No API keys set. Go to Settings -> API Keys\n"
+        text += "API ключи не указаны. Перейдите: Настройки -> API ключи\n"
 
     if user["trading_mode"] == "paper":
-        text += f"\nPaper Balance: {user['paper_balance']:.2f} USDT"
+        text += f"\nДемо-баланс: {user['paper_balance']:.2f} USDT"
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
     await callback.answer()
@@ -135,7 +135,7 @@ async def show_balance(callback: CallbackQuery):
 async def cmd_balance(message: Message):
     user = await get_user(message.from_user.id)
     if not user:
-        await message.answer("Please /start first")
+        await message.answer("Сначала нажмите /start")
         return
 
     text = ""
@@ -163,59 +163,59 @@ async def cmd_balance(message: Message):
 async def start_bot(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user or not user["is_registered"]:
-        await callback.answer("Complete registration first")
+        await callback.answer("Сначала завершите регистрацию")
         return
 
     if user["is_bot_active"]:
-        await callback.answer("Bot is already running")
+        await callback.answer("Бот уже запущен")
         return
 
     if user["trading_mode"] == "live":
         keys = await get_api_keys(user["id"])
         if not keys:
-            await callback.answer("Set API keys first")
+            await callback.answer("Сначала укажите API ключи")
             return
 
     await update_user(callback.from_user.id, is_bot_active=1)
     await callback.message.edit_text(
-        "Bot STARTED!\n\n"
-        f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-        f"Preset: {user['trader_preset'].capitalize()}\n\n"
-        "AI is now analyzing markets and will open positions when conditions are met.",
+        "Бот ЗАПУЩЕН!\n\n"
+        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+        f"Пресет: {user['trader_preset'].capitalize()}\n\n"
+        "AI анализирует рынок и откроет сделки при выполнении условий.",
         reply_markup=main_menu_kb(),
     )
-    await callback.answer("Bot started!")
+    await callback.answer("Бот запущен!")
 
 
 @router.callback_query(F.data == "stop_bot")
 async def stop_bot(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     if not user["is_bot_active"]:
-        await callback.answer("Bot is not running")
+        await callback.answer("Бот не запущен")
         return
 
     await update_user(callback.from_user.id, is_bot_active=0)
     await callback.message.edit_text(
-        "Bot STOPPED.\n\nNo new trades will be opened. Existing positions remain open.",
+        "Бот ОСТАНОВЛЕН.\n\nНовые сделки открываться не будут. Текущие позиции останутся открыты.",
         reply_markup=main_menu_kb(),
     )
-    await callback.answer("Bot stopped")
+    await callback.answer("Бот остановлен")
 
 
 @router.callback_query(F.data == "positions")
 async def show_positions(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     trades = await get_open_trades(user["id"])
     if not trades:
-        await callback.message.edit_text("No open positions.", reply_markup=main_menu_kb())
+        await callback.message.edit_text("Нет открытых позиций.", reply_markup=main_menu_kb())
         await callback.answer()
         return
 
@@ -225,10 +225,10 @@ async def show_positions(callback: CallbackQuery):
         paper_tag = "[P] " if t["is_paper"] else ""
         text += (
             f"{paper_tag}{t['side']} {display}\n"
-            f"  Entry: {t['entry_price']} | Leverage: {t['leverage']}x\n"
+            f"  Вход: {t['entry_price']} | Плечо: {t['leverage']}x\n"
             f"  SL: {t['sl_price']} | TP: {t['tp1_price']}\n"
-            f"  Size: {t['position_size_usdt']:.2f} USDT\n"
-            f"  Confidence: {t['confidence']:.1f}%\n\n"
+            f"  Размер: {t['position_size_usdt']:.2f} USDT\n"
+            f"  Уверенность: {t['confidence']:.1f}%\n\n"
         )
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
@@ -239,12 +239,12 @@ async def show_positions(callback: CallbackQuery):
 async def cmd_positions(message: Message):
     user = await get_user(message.from_user.id)
     if not user:
-        await message.answer("Please /start first")
+        await message.answer("Сначала нажмите /start")
         return
 
     trades = await get_open_trades(user["id"])
     if not trades:
-        await message.answer("No open positions.")
+        await message.answer("Нет открытых позиций.")
         return
 
     text = f"Open Positions ({len(trades)}):\n\n"
@@ -253,7 +253,7 @@ async def cmd_positions(message: Message):
         paper_tag = "[P] " if t["is_paper"] else ""
         text += (
             f"{paper_tag}{t['side']} {display}\n"
-            f"  Entry: {t['entry_price']} | Lev: {t['leverage']}x\n"
+            f"  Вход: {t['entry_price']} | Плечо: {t['leverage']}x\n"
             f"  SL: {t['sl_price']} | TP: {t['tp1_price']}\n\n"
         )
 
@@ -264,12 +264,12 @@ async def cmd_positions(message: Message):
 async def show_history(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     trades = await get_trade_history(user["id"], limit=10)
     if not trades:
-        await callback.message.edit_text("No trade history.", reply_markup=main_menu_kb())
+        await callback.message.edit_text("Нет истории сделок.", reply_markup=main_menu_kb())
         await callback.answer()
         return
 
@@ -281,11 +281,11 @@ async def show_history(callback: CallbackQuery):
         paper_tag = "[P] " if t["is_paper"] else ""
         text += (
             f"{paper_tag}{t['side']} {display} [{status}]\n"
-            f"  Entry: {t['entry_price']}"
+            f"  Вход: {t['entry_price']}"
         )
         if t["exit_price"]:
             text += f" -> {t['exit_price']}"
-        text += f"\n  PnL: {pnl_sign}{t['pnl']:.4f} USDT ({pnl_sign}{t['pnl_percent']:.2f}%)\n\n"
+        text += f"\n  Прибыль: {pnl_sign}{t['pnl']:.4f} USDT ({pnl_sign}{t['pnl_percent']:.2f}%)\n\n"
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
     await callback.answer()
@@ -295,7 +295,7 @@ async def show_history(callback: CallbackQuery):
 async def cmd_history(message: Message):
     user = await get_user(message.from_user.id)
     if not user:
-        await message.answer("Please /start first")
+        await message.answer("Сначала нажмите /start")
         return
 
     trades = await get_trade_history(user["id"], limit=10)
@@ -316,7 +316,7 @@ async def cmd_history(message: Message):
 async def show_pnl(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     pnl_data = await get_user_total_pnl(user["id"])
@@ -327,11 +327,11 @@ async def show_pnl(callback: CallbackQuery):
     pnl_sign = "+" if pnl_data["total_pnl"] > 0 else ""
 
     text = (
-        f"PnL Summary\n\n"
-        f"Total PnL: {pnl_sign}{pnl_data['total_pnl']:.4f} USDT\n"
-        f"Total Trades: {total}\n"
-        f"Wins: {wins} | Losses: {losses}\n"
-        f"Win Rate: {wr:.1f}%\n"
+        f"Сводка PnL\n\n"
+        f"Суммарный PnL: {pnl_sign}{pnl_data['total_pnl']:.4f} USDT\n"
+        f"Всего сделок: {total}\n"
+        f"Победы: {wins} | Поражения: {losses}\n"
+        f"Винрейт: {wr:.1f}%\n"
     )
 
     await callback.message.edit_text(text, reply_markup=main_menu_kb())
@@ -342,7 +342,7 @@ async def show_pnl(callback: CallbackQuery):
 async def cmd_pnl(message: Message):
     user = await get_user(message.from_user.id)
     if not user:
-        await message.answer("Please /start first")
+        await message.answer("Сначала нажмите /start")
         return
 
     pnl_data = await get_user_total_pnl(user["id"])
@@ -351,8 +351,8 @@ async def cmd_pnl(message: Message):
 
     await message.answer(
         f"PnL: {pnl_sign}{pnl_data['total_pnl']:.4f} USDT | "
-        f"Trades: {total} | "
-        f"WR: {(pnl_data['wins'] / total * 100) if total > 0 else 0:.1f}%"
+        f"Сделок: {total} | "
+        f"Винрейт: {(pnl_data['wins'] / total * 100) if total > 0 else 0:.1f}%"
     )
 
 
@@ -360,12 +360,12 @@ async def cmd_pnl(message: Message):
 async def close_all_positions(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     trades = await get_open_trades(user["id"])
     if not trades:
-        await callback.answer("No open positions")
+        await callback.answer("Нет открытых позиций")
         return
 
     from trading.bybit_client import BybitClient
@@ -409,18 +409,18 @@ async def close_all_positions(callback: CallbackQuery):
             continue
 
     await callback.message.edit_text(
-        f"Closed {closed}/{len(trades)} positions.",
+        f"Закрыто {closed}/{len(trades)} позиций.",
         reply_markup=main_menu_kb(),
     )
-    await callback.answer(f"Closed {closed} positions")
+    await callback.answer(f"Закрыто {closed} позиций")
 
 
 @router.callback_query(F.data == "set_api_keys")
 async def set_api_keys_start(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
-        "Enter your Bybit API Key:\n\n"
-        "(Create at bybit.com -> API Management)\n"
-        "(Enable Futures trading, disable withdrawals)"
+        "Введите ваш Bybit API Key:\n\n"
+        "(Создайте на bybit.com -> API Management)\n"
+        "(Включите разрешение на фьючерсы, вывод отключён)"
     )
     await state.set_state(ApiKeyInput.waiting_key)
     await callback.answer()
@@ -430,11 +430,11 @@ async def set_api_keys_start(callback: CallbackQuery, state: FSMContext):
 async def api_key_input(message: Message, state: FSMContext):
     key = message.text.strip()
     if len(key) < 10:
-        await message.answer("Invalid key. Try again:")
+        await message.answer("Неверный ключ. Попробуйте ещё:")
         return
     await state.update_data(api_key=key)
     await message.delete()
-    await message.answer("Got it. Now send API Secret:")
+    await message.answer("Ок. Теперь отправьте API Secret:")
     await state.set_state(ApiKeyInput.waiting_secret)
 
 
@@ -442,20 +442,20 @@ async def api_key_input(message: Message, state: FSMContext):
 async def api_secret_input(message: Message, state: FSMContext):
     secret = message.text.strip()
     if len(secret) < 10:
-        await message.answer("Invalid secret. Try again:")
+        await message.answer("Неверный секрет. Попробуйте ещё:")
         return
 
     data = await state.get_data()
     key = data["api_key"]
     await message.delete()
 
-    status_msg = await message.answer("Validating...")
+    status_msg = await message.answer("Проверяю...")
 
     try:
         client = BybitClient(key, secret)
         bal = client.get_balance()
         if bal is None:
-            await status_msg.edit_text("Invalid keys. Try /settings -> API Keys again.")
+            await status_msg.edit_text("Ключи неверны. Попробуйте снова: /settings -> API Keys")
             await state.clear()
             return
 
@@ -465,10 +465,10 @@ async def api_secret_input(message: Message, state: FSMContext):
         await update_user(message.from_user.id, is_registered=1)
 
         await status_msg.edit_text(
-            f"API keys saved!\nBalance: {bal['total']:.2f} USDT",
+            f"API ключи сохранены!\nБаланс: {bal['total']:.2f} USDT",
             reply_markup=main_menu_kb(),
         )
     except Exception as e:
-        await status_msg.edit_text(f"Error: {e}")
+        await status_msg.edit_text(f"Ошибка: {e}")
 
     await state.clear()

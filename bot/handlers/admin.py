@@ -30,13 +30,13 @@ def is_admin(telegram_id: int) -> bool:
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
     if not is_admin(message.from_user.id):
-        await message.answer("Access denied.")
+        await message.answer("Доступ запрещён.")
         return
 
     stats = await get_platform_stats()
     text = (
-        f"Admin Panel\n\n"
-        f"Users: {stats['total_users']}\n"
+        f"Админ-панель\n\n"
+        f"Пользователи: {stats['total_users']}\n"
         f"Active Bots: {stats['active_bots']}\n"
         f"Total Trades: {stats['total_trades']}\n"
         f"Platform PnL: {stats['total_pnl']:.4f} USDT\n"
@@ -55,23 +55,23 @@ async def admin_users(callback: CallbackQuery):
 
     users = await get_all_users()
     if not users:
-        await callback.message.edit_text("No users yet.", reply_markup=admin_kb())
+        await callback.message.edit_text("Пользователей пока нет.", reply_markup=admin_kb())
         await callback.answer()
         return
 
-    text = f"Users ({len(users)}):\n\n"
+    text = f"Пользователи ({len(users)}):\n\n"
     for u in users:
         pnl = await get_user_total_pnl(u["id"])
-        admin_tag = " [ADMIN]" if u["is_admin"] else ""
-        bot_status = "ON" if u["is_bot_active"] else "OFF"
+        admin_tag = " [АДМИН]" if u["is_admin"] else ""
+        bot_status = "ВКЛ" if u["is_bot_active"] else "ВЫКЛ"
         mode = "P" if u["trading_mode"] == "paper" else "L"
         pnl_sign = "+" if pnl["total_pnl"] > 0 else ""
 
         text += (
             f"#{u['id']} @{u['username'] or 'N/A'}{admin_tag}\n"
             f"  {u['first_name'] or ''} | TG: {u['telegram_id']}\n"
-            f"  Mode: {mode} | Bot: {bot_status} | Preset: {u['trader_preset']}\n"
-            f"  PnL: {pnl_sign}{pnl['total_pnl']:.4f} | Trades: {pnl['total_trades']}\n\n"
+            f"  Режим: {mode} | Бот: {bot_status} | Пресет: {u['trader_preset']}\n"
+            f"  PnL: {pnl_sign}{pnl['total_pnl']:.4f} | Сделок: {pnl['total_trades']}\n\n"
         )
 
     if len(text) > 4000:
@@ -105,19 +105,19 @@ async def admin_stats(callback: CallbackQuery):
             worst_user = u
 
     text = (
-        f"Platform Statistics\n\n"
-        f"Total Users: {stats['total_users']}\n"
-        f"Active Bots: {stats['active_bots']}\n"
-        f"Total Trades: {stats['total_trades']}\n"
-        f"Today Trades: {stats['today_trades']}\n"
-        f"Platform PnL: {stats['total_pnl']:.4f} USDT\n"
-        f"Win Rate: {stats['win_rate']:.1f}%\n"
+        f"Статистика платформы\n\n"
+        f"Всего пользователей: {stats['total_users']}\n"
+        f"Активные боты: {stats['active_bots']}\n"
+        f"Всего сделок: {stats['total_trades']}\n"
+        f"Сделок сегодня: {stats['today_trades']}\n"
+        f"PnL платформы: {stats['total_pnl']:.4f} USDT\n"
+        f"Винрейт: {stats['win_rate']:.1f}%\n"
     )
 
     if best_user:
-        text += f"\nBest: @{best_user['username'] or 'N/A'} ({best_pnl:+.4f} USDT)"
+        text += f"\nЛучший: @{best_user['username'] or 'N/A'} ({best_pnl:+.4f} USDT)"
     if worst_user:
-        text += f"\nWorst: @{worst_user['username'] or 'N/A'} ({worst_pnl:+.4f} USDT)"
+        text += f"\nХудший: @{worst_user['username'] or 'N/A'} ({worst_pnl:+.4f} USDT)"
 
     await callback.message.edit_text(text, reply_markup=admin_kb())
     await callback.answer()
@@ -134,10 +134,10 @@ async def admin_model(callback: CallbackQuery):
     status = model.get_status()
 
     text = (
-        f"AI Model Status\n\n"
-        f"Type: {status['model_type']}\n"
-        f"Trained: {'Yes' if status['is_trained'] else 'No'}\n"
-        f"Last Train: {status['last_train_time'] or 'Never'}\n"
+        f"Статус AI модели\n\n"
+        f"Тип: {status['model_type']}\n"
+        f"Обучена: {'Да' if status['is_trained'] else 'Нет'}\n"
+        f"Последнее обучение: {status['last_train_time'] or 'Никогда'}\n"
     )
 
     await callback.message.edit_text(text, reply_markup=admin_kb())
@@ -150,7 +150,7 @@ async def admin_retrain(callback: CallbackQuery):
         await callback.answer("Access denied")
         return
 
-    await callback.message.edit_text("Retraining model... This may take a minute.")
+    await callback.message.edit_text("Переобучаю модель... Это может занять минуту.")
     await callback.answer()
 
     try:
@@ -162,18 +162,18 @@ async def admin_retrain(callback: CallbackQuery):
 
         if success:
             await callback.message.edit_text(
-                "Model retrained successfully!",
+                "Модель успешно переобучена!",
                 reply_markup=admin_kb(),
             )
             await log_event("INFO", "admin", "Model retrained by admin")
         else:
             await callback.message.edit_text(
-                "Training failed. Not enough data or error occurred.",
+                "Обучение не удалось. Недостаточно данных или произошла ошибка.",
                 reply_markup=admin_kb(),
             )
     except Exception as e:
         await callback.message.edit_text(
-            f"Training error: {str(e)}",
+            f"Ошибка обучения: {str(e)}",
             reply_markup=admin_kb(),
         )
 
@@ -184,7 +184,7 @@ async def admin_broadcast_start(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Access denied")
         return
 
-    await callback.message.edit_text("Send the message to broadcast to all users:")
+    await callback.message.edit_text("Отправьте сообщение для рассылки всем пользователям:")
     await state.set_state(BroadcastState.waiting_message)
     await callback.answer()
 
@@ -204,14 +204,14 @@ async def admin_broadcast_send(message: Message, state: FSMContext):
         try:
             await message.bot.send_message(
                 u["telegram_id"],
-                f"[Broadcast from Admin]\n\n{broadcast_text}",
+                f"[Рассылка от админа]\n\n{broadcast_text}",
             )
             sent += 1
         except Exception:
             failed += 1
 
     await message.answer(
-        f"Broadcast sent!\nDelivered: {sent}\nFailed: {failed}",
+        f"Рассылка отправлена!\nДоставлено: {sent}\nОшибок: {failed}",
         reply_markup=admin_kb(),
     )
     await state.clear()
@@ -234,11 +234,11 @@ async def admin_logs(callback: CallbackQuery):
         await db.close()
 
     if not logs:
-        await callback.message.edit_text("No logs yet.", reply_markup=admin_kb())
+        await callback.message.edit_text("Логов пока нет.", reply_markup=admin_kb())
         await callback.answer()
         return
 
-    text = "Recent Logs:\n\n"
+    text = "Свежие логи:\n\n"
     for log in logs:
         log = dict(log)
         text += f"[{log['level']}] {log['module']}: {log['message']}\n{log['created_at']}\n\n"
@@ -256,7 +256,7 @@ async def admin_set_api(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Access denied")
         return
 
-    await callback.message.edit_text("Send your Bybit API Key:")
+    await callback.message.edit_text("Отправьте ваш Bybit API Key:")
     await state.set_state(AdminApiKeys.waiting_key)
     await callback.answer()
 
@@ -270,7 +270,7 @@ async def admin_api_key(message: Message, state: FSMContext):
     key = message.text.strip()
     await state.update_data(api_key=key)
     await message.delete()
-    await message.answer("Got it. Now send API Secret:")
+    await message.answer("Ок. Теперь отправьте API Secret:")
     await state.set_state(AdminApiKeys.waiting_secret)
 
 
@@ -285,13 +285,13 @@ async def admin_api_secret(message: Message, state: FSMContext):
     key = data["api_key"]
     await message.delete()
 
-    status_msg = await message.answer("Validating...")
+    status_msg = await message.answer("Проверяю...")
 
     try:
         client = BybitClient(key, secret)
         bal = client.get_balance()
         if bal is None:
-            await status_msg.edit_text("Invalid keys.", reply_markup=admin_kb())
+            await status_msg.edit_text("Неверные ключи.", reply_markup=admin_kb())
             await state.clear()
             return
 
@@ -310,11 +310,11 @@ async def admin_api_secret(message: Message, state: FSMContext):
         await update_user(message.from_user.id, is_registered=1)
 
         await status_msg.edit_text(
-            f"Admin API keys saved!\nBalance: {bal['total']:.2f} USDT",
+            f"API ключи админа сохранены!\nБаланс: {bal['total']:.2f} USDT",
             reply_markup=admin_kb(),
         )
         await log_event("INFO", "admin", "Admin API keys updated")
     except Exception as e:
-        await status_msg.edit_text(f"Error: {e}", reply_markup=admin_kb())
+        await status_msg.edit_text(f"Ошибка: {e}", reply_markup=admin_kb())
 
     await state.clear()

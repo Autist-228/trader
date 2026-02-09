@@ -12,24 +12,24 @@ router = Router()
 async def show_settings(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.answer("Please /start first")
+        await callback.answer("Сначала нажмите /start")
         return
 
     settings = await get_user_settings(user["id"])
     preset = get_preset(user["trader_preset"])
 
     text = (
-        f"Settings\n\n"
-        f"AI Trader: {preset['emoji']} {preset['name']}\n"
-        f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-        f"Leverage: {settings['leverage_min']}-{settings['leverage_max']}x\n"
-        f"Position: {settings['position_size_min']}-{settings['position_size_max']}%\n"
+        f"Настройки\n\n"
+        f"AI Трейдер: {preset['emoji']} {preset['name']}\n"
+        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+        f"Плечо: {settings['leverage_min']}-{settings['leverage_max']}x\n"
+        f"Размер позиции: {settings['position_size_min']}-{settings['position_size_max']}%\n"
         f"SL: {settings['sl_min']}-{settings['sl_max']}%\n"
         f"TP: {settings['tp_min']}-{settings['tp_max']}%\n"
-        f"Max Daily Loss: {settings['max_daily_loss']}%\n"
-        f"Max Positions: {settings['max_positions']}\n"
-        f"Min Confidence: {settings['min_confidence']}%\n"
-        f"Coins: {', '.join(settings['coins'])}\n"
+        f"Макс. дневная просадка: {settings['max_daily_loss']}%\n"
+        f"Макс. позиций: {settings['max_positions']}\n"
+        f"Мин. уверенность: {settings['min_confidence']}%\n"
+        f"Монеты: {', '.join(settings['coins'])}\n"
     )
 
     await callback.message.edit_text(text, reply_markup=settings_kb())
@@ -41,15 +41,15 @@ async def set_trader(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     current = user["trader_preset"]
 
-    text = "Select AI Trader:\n\n"
+    text = "Выберите AI трейдера:\n\n"
     for key, p in PRESETS.items():
-        marker = " <- current" if key == current else ""
+        marker = " <- текущая" if key == current else ""
         text += (
             f"{p['emoji']} {p['name']}{marker}\n"
-            f"  Leverage: {p['leverage_min']}-{p['leverage_max']}x\n"
-            f"  Position: {p['position_size_min']}-{p['position_size_max']}%\n"
-            f"  Confidence: {p['min_confidence']}%+\n"
-            f"  Coins: {len(p['coins'])}\n\n"
+            f"  Плечо: {p['leverage_min']}-{p['leverage_max']}x\n"
+            f"  Размер позиции: {p['position_size_min']}-{p['position_size_max']}%\n"
+            f"  Уверенность: {p['min_confidence']}%+\n"
+            f"  Монеты: {len(p['coins'])}\n\n"
         )
 
     await callback.message.edit_text(text, reply_markup=trader_preset_kb())
@@ -71,18 +71,18 @@ async def select_preset(callback: CallbackQuery):
 
     preset = get_preset(preset_name)
     await callback.message.edit_text(
-        f"AI Trader set to {preset['emoji']} {preset['name']}!\n\n"
-        f"Leverage: {preset['leverage_min']}-{preset['leverage_max']}x\n"
-        f"Position: {preset['position_size_min']}-{preset['position_size_max']}%\n"
+        f"AI трейдер установлен: {preset['emoji']} {preset['name']}!\n\n"
+        f"Плечо: {preset['leverage_min']}-{preset['leverage_max']}x\n"
+        f"Размер позиции: {preset['position_size_min']}-{preset['position_size_max']}%\n"
         f"SL: {preset['sl_min']}-{preset['sl_max']}%\n"
         f"TP: {preset['tp_min']}-{preset['tp_max']}%\n"
-        f"Max Daily Loss: {preset['max_daily_loss']}%\n"
-        f"Max Positions: {preset['max_positions']}\n"
-        f"Min Confidence: {preset['min_confidence']}%\n"
-        f"Coins: {', '.join(preset['coins'])}",
+        f"Макс. дневная просадка: {preset['max_daily_loss']}%\n"
+        f"Макс. позиций: {preset['max_positions']}\n"
+        f"Мин. уверенность: {preset['min_confidence']}%\n"
+        f"Монеты: {', '.join(preset['coins'])}",
         reply_markup=settings_kb(),
     )
-    await callback.answer("Preset applied!")
+    await callback.answer("Пресет применён!")
 
 
 @router.callback_query(F.data == "set_mode")
@@ -91,10 +91,10 @@ async def set_mode(callback: CallbackQuery):
     current = user["trading_mode"]
 
     await callback.message.edit_text(
-        f"Current mode: {'Paper Trading' if current == 'paper' else 'LIVE Trading'}\n\n"
-        f"Paper Trading: Uses real prices but no real money\n"
-        f"Live Trading: Real orders on your Bybit account\n\n"
-        f"Select mode:",
+        f"Текущий режим: {'Демо' if current == 'paper' else 'РЕАЛЬНЫЙ'}\n\n"
+        f"Демо: реальные цены, без реальных денег\n"
+        f"Реальный: реальные ордера на вашем аккаунте Bybit\n\n"
+        f"Выберите режим:",
         reply_markup=mode_kb(),
     )
     await callback.answer()
@@ -104,21 +104,21 @@ async def set_mode(callback: CallbackQuery):
 async def mode_paper(callback: CallbackQuery):
     await update_user(callback.from_user.id, trading_mode="paper")
     await callback.message.edit_text(
-        "Mode set to Paper Trading\n\n"
-        "The bot will simulate trades using real market prices.\n"
-        "No real money will be used.",
+        "Режим установлен: Демо\n\n"
+        "Бот будет симулировать сделки по реальным ценам.\n"
+        "Реальные деньги использоваться не будут.",
         reply_markup=settings_kb(),
     )
-    await callback.answer("Paper mode activated")
+    await callback.answer("Демо-режим активирован")
 
 
 @router.callback_query(F.data == "mode_live")
 async def mode_live(callback: CallbackQuery):
     await callback.message.edit_text(
-        "WARNING: LIVE TRADING MODE\n\n"
-        "This will use REAL money from your Bybit account.\n"
-        "You can lose your entire deposit.\n\n"
-        "Are you sure?",
+        "ВНИМАНИЕ: РЕАЛЬНЫЙ РЕЖИМ\n\n"
+        "Будут использованы РЕАЛЬНЫЕ деньги с вашего аккаунта Bybit.\n"
+        "Вы можете потерять весь депозит.\n\n"
+        "Вы уверены?",
         reply_markup=confirm_live_kb(),
     )
     await callback.answer()
@@ -132,17 +132,17 @@ async def confirm_live(callback: CallbackQuery):
 
     if not keys:
         await callback.message.edit_text(
-            "You need to set up API keys first before switching to Live mode.",
+            "Сначала настройте API ключи, прежде чем переходить в реальный режим.",
             reply_markup=settings_kb(),
         )
-        await callback.answer("Set up API keys first")
+        await callback.answer("Сначала настройте API ключи")
         return
 
     await update_user(callback.from_user.id, trading_mode="live")
     await callback.message.edit_text(
-        "LIVE MODE ACTIVATED\n\n"
-        "The bot will now execute real trades on your Bybit account.\n"
-        "Be careful and monitor your positions.",
+        "РЕАЛЬНЫЙ РЕЖИМ АКТИВИРОВАН\n\n"
+        "Бот теперь будет совершать реальные сделки на вашем аккаунте Bybit.\n"
+        "Будьте осторожны и контролируйте позиции.",
         reply_markup=settings_kb(),
     )
     await callback.answer("Live mode activated!")
@@ -175,4 +175,4 @@ async def toggle_notification(callback: CallbackQuery):
         "Notification Settings:\n\nToggle notifications on/off:",
         reply_markup=notifications_kb(settings),
     )
-    await callback.answer(f"{'Enabled' if new_val else 'Disabled'}")
+    await callback.answer(f"{'Включено' if new_val else 'Выключено'}")

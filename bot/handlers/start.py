@@ -22,11 +22,12 @@ async def cmd_start(message: Message):
     user = await get_user(telegram_id)
 
     if user and user["is_registered"]:
+        preset_names = {'conservative': 'Консервативный', 'balanced': 'Сбалансированный', 'aggressive': 'Агрессивный'}
         text = (
-            f"Welcome back, {message.from_user.first_name}!\n\n"
-            f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-            f"Preset: {user['trader_preset'].capitalize()}\n"
-            f"Bot: {'Active' if user['is_bot_active'] else 'Stopped'}\n"
+            f"С возвращением, {message.from_user.first_name}!\n\n"
+            f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+            f"Стратегия: {preset_names.get(user['trader_preset'], user['trader_preset'])}\n"
+            f"Бот: {'Работает' if user['is_bot_active'] else 'Остановлен'}\n"
         )
 
         keys = await get_api_keys(user["id"])
@@ -35,12 +36,12 @@ async def cmd_start(message: Message):
                 client = BybitClient(keys[0], keys[1])
                 bal = client.get_balance()
                 if bal:
-                    text += f"\nBalance: {bal['total']:.2f} USDT"
+                    text += f"\nБаланс: {bal['total']:.2f} USDT"
             except Exception:
                 pass
 
         if user["trading_mode"] == "paper":
-            text += f"\nPaper Balance: {user['paper_balance']:.2f} USDT"
+            text += f"\nДемо-баланс: {user['paper_balance']:.2f} USDT"
 
         await message.answer(text, reply_markup=main_menu_kb())
         return
@@ -54,22 +55,23 @@ async def cmd_start(message: Message):
             is_admin=True,
         )
         await message.answer(
-            "Welcome, Admin!\n\n"
-            "You are registered as the platform administrator.\n"
-            "Use /admin for admin panel.\n\n"
-            "Set up your Bybit API keys to start trading.",
+            "Добро пожаловать, Админ!\n\n"
+            "Ты зарегистрирован как администратор платформы.\n"
+            "Нажми /admin для админ-панели.\n\n"
+            "Настрой API ключи Bybit чтобы начать торговлю.",
             reply_markup=main_menu_kb(),
         )
         return
 
     await message.answer(
-        "Welcome to AI Trading Bot!\n\n"
-        "This bot uses AI (LightGBM) to trade crypto futures on Bybit.\n\n"
-        "DISCLAIMER:\n"
-        "Trading involves significant risk. You can lose all your money. "
-        "This bot does NOT guarantee profits. Past performance does not "
-        "indicate future results. Only trade with money you can afford to lose.\n\n"
-        "By pressing the button below, you accept all risks.",
+        "AI Trading Bot\n\n"
+        "Этот бот использует AI (LightGBM) для торговли крипто-фьючерсами на Bybit.\n\n"
+        "ВНИМАНИЕ:\n"
+        "Торговля связана с риском. Вы можете потерять все деньги. "
+        "Бот НЕ гарантирует прибыль. Прошлые результаты не "
+        "гарантируют будущую прибыль. Торгуйте только теми средствами, "
+        "которые можете позволить себе потерять.\n\n"
+        "Нажмите кнопку ниже, если принимаете риски.",
         reply_markup=start_kb(),
     )
 
@@ -86,11 +88,11 @@ async def accept_terms(callback: CallbackQuery, state: FSMContext):
         )
 
     await callback.message.edit_text(
-        "Great! Now let's set up your Bybit API keys.\n\n"
-        "1. Go to bybit.com -> API Management\n"
-        "2. Create a new API key with Futures trading permission\n"
-        "3. DO NOT enable withdrawal permission\n\n"
-        "Send me your API Key:"
+        "Отлично! Теперь настроим API ключи Bybit.\n\n"
+        "1. Зайди на bybit.com -> Управление API\n"
+        "2. Создай новый API ключ с разрешением на фьючерсы\n"
+        "3. НЕ включай разрешение на вывод средств\n\n"
+        "Отправь мне свой API Key:"
     )
     await state.set_state(ApiKeyStates.waiting_api_key)
     await callback.answer()
@@ -100,12 +102,12 @@ async def accept_terms(callback: CallbackQuery, state: FSMContext):
 async def receive_api_key(message: Message, state: FSMContext):
     api_key = message.text.strip()
     if len(api_key) < 10:
-        await message.answer("Invalid API key. Please try again:")
+        await message.answer("Неверный API ключ. Попробуй ещё:")
         return
 
     await state.update_data(api_key=api_key)
     await message.delete()
-    await message.answer("API Key received. Now send me your API Secret:")
+    await message.answer("API Key получен. Теперь отправь API Secret:")
     await state.set_state(ApiKeyStates.waiting_api_secret)
 
 
@@ -113,22 +115,22 @@ async def receive_api_key(message: Message, state: FSMContext):
 async def receive_api_secret(message: Message, state: FSMContext):
     api_secret = message.text.strip()
     if len(api_secret) < 10:
-        await message.answer("Invalid API secret. Please try again:")
+        await message.answer("Неверный API secret. Попробуй ещё:")
         return
 
     data = await state.get_data()
     api_key = data["api_key"]
 
     await message.delete()
-    status_msg = await message.answer("Validating keys...")
+    status_msg = await message.answer("Проверяю ключи...")
 
     try:
         client = BybitClient(api_key, api_secret)
         bal = client.get_balance()
         if bal is None:
             await status_msg.edit_text(
-                "API keys are invalid or don't have correct permissions.\n"
-                "Please check and try again.\n\nSend me your API Key:"
+                "API ключи неверные или нет нужных разрешений.\n"
+                "Проверь и попробуй снова.\n\nОтправь API Key:"
             )
             await state.set_state(ApiKeyStates.waiting_api_key)
             return
@@ -138,14 +140,14 @@ async def receive_api_secret(message: Message, state: FSMContext):
         await update_user(message.from_user.id, is_registered=1)
 
         await status_msg.edit_text(
-            f"API keys validated!\n"
-            f"Balance: {bal['total']:.2f} USDT\n\n"
-            f"Your account is ready. Choose your settings:",
+            f"API ключи проверены!\n"
+            f"Баланс: {bal['total']:.2f} USDT\n\n"
+            f"Аккаунт готов. Выбери настройки:",
             reply_markup=settings_kb(),
         )
     except Exception as e:
         await status_msg.edit_text(
-            f"Error validating keys: {str(e)}\n\nSend me your API Key:"
+            f"Ошибка проверки ключей: {str(e)}\n\nОтправь API Key:"
         )
         await state.set_state(ApiKeyStates.waiting_api_key)
 
@@ -156,14 +158,15 @@ async def receive_api_secret(message: Message, state: FSMContext):
 async def main_menu(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
     if not user:
-        await callback.message.edit_text("Please /start first.")
+        await callback.message.edit_text("Нажми /start для начала.")
         return
 
+    preset_names = {'conservative': 'Консервативный', 'balanced': 'Сбалансированный', 'aggressive': 'Агрессивный'}
     text = (
-        f"Main Menu\n\n"
-        f"Mode: {'Paper' if user['trading_mode'] == 'paper' else 'LIVE'}\n"
-        f"Preset: {user['trader_preset'].capitalize()}\n"
-        f"Bot: {'Active' if user['is_bot_active'] else 'Stopped'}\n"
+        f"Главное меню\n\n"
+        f"Режим: {'Демо' if user['trading_mode'] == 'paper' else 'РЕАЛЬНЫЙ'}\n"
+        f"Стратегия: {preset_names.get(user['trader_preset'], user['trader_preset'])}\n"
+        f"Бот: {'Работает' if user['is_bot_active'] else 'Остановлен'}\n"
     )
 
     keys = await get_api_keys(user["id"])
@@ -172,7 +175,7 @@ async def main_menu(callback: CallbackQuery):
             client = BybitClient(keys[0], keys[1])
             bal = client.get_balance()
             if bal:
-                text += f"\nBybit Balance: {bal['total']:.2f} USDT"
+                text += f"\nБаланс Bybit: {bal['total']:.2f} USDT"
         except Exception:
             pass
 
@@ -186,13 +189,13 @@ async def main_menu(callback: CallbackQuery):
 @router.message(Command("help"))
 async def cmd_help(message: Message):
     await message.answer(
-        "Commands:\n"
-        "/start - Main menu\n"
-        "/status - Current status\n"
-        "/balance - Check balance\n"
-        "/positions - Open positions\n"
-        "/history - Trade history\n"
-        "/pnl - Profit/Loss summary\n"
-        "/settings - Bot settings\n"
-        "/help - This message\n"
+        "Команды:\n"
+        "/start - Главное меню\n"
+        "/status - Текущий статус\n"
+        "/balance - Проверить баланс\n"
+        "/positions - Открытые позиции\n"
+        "/history - История сделок\n"
+        "/pnl - Прибыль/убыток\n"
+        "/settings - Настройки бота\n"
+        "/help - Это сообщение\n"
     )
