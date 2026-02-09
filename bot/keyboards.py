@@ -13,7 +13,6 @@ def main_menu_kb() -> InlineKeyboardMarkup:
          InlineKeyboardButton(text="Balance", callback_data="balance")],
         [InlineKeyboardButton(text="Start Bot", callback_data="start_bot"),
          InlineKeyboardButton(text="Stop Bot", callback_data="stop_bot")],
-        [InlineKeyboardButton(text="Bankroll Boost", callback_data="boost_menu")],
         [InlineKeyboardButton(text="Positions", callback_data="positions"),
          InlineKeyboardButton(text="History", callback_data="history")],
         [InlineKeyboardButton(text="PnL", callback_data="pnl"),
@@ -37,7 +36,6 @@ def trader_preset_kb() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="Conservative (Low Risk)", callback_data="preset_conservative")],
         [InlineKeyboardButton(text="Balanced (Medium Risk)", callback_data="preset_balanced")],
         [InlineKeyboardButton(text="Aggressive (High Risk)", callback_data="preset_aggressive")],
-        [InlineKeyboardButton(text="Bankroll Boost ($10->$50)", callback_data="preset_bankroll_boost")],
         [InlineKeyboardButton(text="Back", callback_data="settings")],
     ])
 
